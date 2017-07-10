@@ -1,5 +1,5 @@
-use Renard::Curie::Setup;
-package Renard::Curie::Data::PDF;
+use Renard::Incunabula::Common::Setup;
+package Renard::Incunabula::MuPDF::mutool;
 # ABSTRACT: Retrieve PDF image and text data via MuPDF's mutool
 
 use Capture::Tiny qw(capture);
@@ -27,7 +27,7 @@ This function dies if C<mutool> unsuccessfully exits.
 
 =cut
 fun _call_mutool( @mutool_args ) {
-	my @args = ( $Renard::Curie::Data::PDF::MUTOOL_PATH, @mutool_args );
+	my @args = ( $Renard::Incunabula::MuPDF::mutool::MUTOOL_PATH, @mutool_args );
 	my ($stdout, $exit);
 
 	# Note: The code below is marked as uncoverable because it only applies
@@ -241,7 +241,7 @@ fun get_mutool_page_info_xml($pdf_filename) {
 
 Returns an array of the outline of the PDF file C<$pdf_filename> as an
 C<ArrayRef[HashRef]> which corresponds to the C<items> attribute of
-L<Renard::Curie::Model::Outline>.
+L<Renard::Incunabula::Outline>.
 
 =cut
 fun get_mutool_outline_simple($pdf_filename) {

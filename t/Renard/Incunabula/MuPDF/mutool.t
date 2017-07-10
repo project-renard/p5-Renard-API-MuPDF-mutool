@@ -5,8 +5,8 @@ use Test::Most;
 use lib 't/lib';
 use CurieTestHelper;
 
-use Renard::Curie::Setup;
-use Renard::Curie::Data::PDF;
+use Renard::Incunabula::Common::Setup;
+use Renard::Incunabula::MuPDF::mutool;
 use Data::DPath qw(dpathi);
 
 my $pdf_ref_path = try {
@@ -18,12 +18,12 @@ my $pdf_ref_path = try {
 plan tests => 4;
 
 subtest 'PDF page to PNG' => sub {
-	my $png_data = Renard::Curie::Data::PDF::get_mutool_pdf_page_as_png( $pdf_ref_path, 1, 1.0 );
+	my $png_data = Renard::Incunabula::MuPDF::mutool::get_mutool_pdf_page_as_png( $pdf_ref_path, 1, 1.0 );
 	like $png_data, qr/^\x{89}PNG/, 'data has PNG stream magic number';
 };
 
 subtest 'Get bounds of PDF page' => sub {
-	my $bounds = Renard::Curie::Data::PDF::get_mutool_page_info_xml( $pdf_ref_path );
+	my $bounds = Renard::Incunabula::MuPDF::mutool::get_mutool_page_info_xml( $pdf_ref_path );
 
 	my $first_page = $bounds->{page}[0];
 	is( $first_page->{pagenum}, 1, 'page number one is the first element of pages key' );
@@ -33,7 +33,7 @@ subtest 'Get bounds of PDF page' => sub {
 subtest 'Get characters for preface' => sub {
 	my $preface_page = 23;
 
-	my $stext = Renard::Curie::Data::PDF::get_mutool_text_stext_xml( $pdf_ref_path, $preface_page );
+	my $stext = Renard::Incunabula::MuPDF::mutool::get_mutool_text_stext_xml( $pdf_ref_path, $preface_page );
 	my $text_concat = "";
 
 	my $root = dpathi($stext);
@@ -48,7 +48,7 @@ subtest 'Get characters for preface' => sub {
 };
 
 subtest 'Get outline of PDF document' => sub {
-	my $outline_data = Renard::Curie::Data::PDF::get_mutool_outline_simple( $pdf_ref_path );
+	my $outline_data = Renard::Incunabula::MuPDF::mutool::get_mutool_outline_simple( $pdf_ref_path );
 
 	cmp_deeply $outline_data,
 		superbagof({
