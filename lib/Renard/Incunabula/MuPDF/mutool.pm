@@ -266,6 +266,26 @@ fun get_mutool_outline_simple($pdf_filename) {
 	return \@outline_items;
 }
 
+fun get_mutool_get_trailer_raw($pdf_filename) {
+	my $trailer_text = _call_mutool(
+		qw(show),
+		$pdf_filename,
+		qw(trailer)
+	);
+
+	$trailer_text;
+}
+
+fun get_mutool_get_object_raw($pdf_filename, $object_id) {
+	my $object_text = _call_mutool(
+		qw(show),
+		$pdf_filename,
+		$object_id,
+	);
+
+	$object_text;
+}
+
 
 1;
 
