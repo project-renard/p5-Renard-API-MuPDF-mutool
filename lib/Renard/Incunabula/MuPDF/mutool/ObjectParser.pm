@@ -134,7 +134,7 @@ method _parse() {
 			$self->data('NOT PARSED');
 			$self->type($self->TypeArray);
 		} else {
-			die "unknown type";
+			die "unknown type"; # uncoverable statement
 		}
 	}
 }
