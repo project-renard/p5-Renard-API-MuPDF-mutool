@@ -4,6 +4,7 @@ package Renard::Incunabula::MuPDF::mutool::ObjectParser;
 
 use Moo;
 use Renard::Incunabula::Common::Types qw(Str Bool File InstanceOf);
+use Renard::Incunabula::MuPDF::mutool::DateObject;
 
 =head1 Types
 
@@ -119,7 +120,11 @@ method _parse() {
 		} elsif( $scalar =~ /^\((?<String>.*)\)/ ) {
 			my $string = $+{String};
 			if( $string =~ /^D:/ ) {
-				$self->data( $self->parse_date($string) );
+				$self->data(
+					Renard::Incunabula::MuPDF::mutool::DateObject->new(
+						string => $string
+					)
+				);
 				$self->type($self->TypeDate);
 			} else {
 				$self->data($self->unescape($string));
@@ -169,84 +174,6 @@ classmethod unescape((Str) $pdf_string ) {
 		/eg;
 
 	$new_string;
-}
-
-=classmethod parse_date
-
-  classmethod parse_date( (Str) $date_string )
-
-A class method that parses PDF date strings which are in the form
-
-  D:YYYYMMDDHHmmSSOHH'mm'
-
-and returns a C<HashRef> in the form
-
-  Dict[
-    year   => Str,   # YYYY
-    month  => Str,   # MM: 01-12
-    day    => Str,   # DD: 01-31
-
-    hour   => Str,   # HH: 00-23
-    minute => Str,   # mm: 00-59
-    second => Str,   # SS: 00-59
-
-    tz     => Dict[
-      offset => Str, # O: /[-+Z]/
-      hour   => Str, # HH': 00-59
-      minute => Str, # mm': 00-59
-    ],
-  ]
-
-=cut
-classmethod parse_date( (Str) $date_string ) {
-	# § 3.8.3 Dates (pg. 160)
-	# (D:YYYYMMDDHHmmSSOHH'mm')
-	# where
-	my $date_re = qr/
-		(?<Prefix>D:)?
-		(?<Year> \d{4} )        # YYYY is the year
-		(?<Month> \d{2} )?      # MM is the month
-		(?<Day> \d{2} )?        # DD is the day (01–31)
-		(?<Hour> \d{2} )?       # HH is the hour (00–23)
-		(?<Minute> \d{2} )?     # mm is the minute (00–59)
-		(?<Second> \d{2} )?     # SS is the second (00–59)
-		(?<TzOffset> [-+Z] )?   # O is the relationship of local time
-		                        # to Universal Time (UT), denoted by
-		                        # one of the characters +, −,
-		                        # or Z (see below)
-		(?<TzHourW>
-			(?<TzHour> \d{2})
-			'
-		)? # HH followed by ' is the absolute
-		   # value of the offset from UT in hours
-		   # (00–23)
-		(?<TzMinuteW>
-			(?<TzMinute> \d{2})
-			'
-		)? # mm followed by ' is the absolute
-		   # value of the offset from UT in
-		   # minutes (00–59)
-	/x;
-
-	my $time = {};
-
-	die "Not a date string" unless $date_string =~ $date_re;
-
-	$time->{year} = $+{Year};
-	$time->{month} = $+{Month} // '01';
-	$time->{day} = $+{Day} // '01';
-
-	$time->{hour} = $+{Hour} // '00';
-	$time->{minute} = $+{Minute} // '00';
-	$time->{second} = $+{Second} // '00';
-
-	if( exists $+{TzOffset} ) {
-		$time->{tz}{offset} = $+{TzOffset};
-		$time->{tz}{hour} = $+{TzHour} // '00';
-		$time->{tz}{minute} = $+{TzMinute} // '00';
-	}
-
-	$time;
 }
 
 =attr data
