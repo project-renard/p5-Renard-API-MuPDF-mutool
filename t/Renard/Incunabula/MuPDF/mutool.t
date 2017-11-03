@@ -15,7 +15,7 @@ my $pdf_ref_path = try {
 	plan skip_all => "$_";
 };
 
-plan tests => 5;
+plan tests => 6;
 
 subtest 'PDF page to PNG' => sub {
 	my $png_data = Renard::Incunabula::MuPDF::mutool::get_mutool_pdf_page_as_png( $pdf_ref_path, 1, 1.0 );
@@ -67,6 +67,12 @@ subtest 'Get PDF trailer and info object raw' => sub {
 
 	my $info_obj = Renard::Incunabula::MuPDF::mutool::get_mutool_get_object_raw( $pdf_ref_path, $info_obj_id );
 	like $info_obj, qr|\Q/Author (Adobe Systems Incorporated)\E|, 'info object has author information';
+};
+
+subtest 'Get parsed info object' => sub {
+	my $info = Renard::Incunabula::MuPDF::mutool::get_mutool_get_info_object_parsed( $pdf_ref_path );
+
+	is $info->resolve_key('Subject')->data, 'Adobe Portable Document Format (PDF)', "correct subject";
 };
 
 done_testing;

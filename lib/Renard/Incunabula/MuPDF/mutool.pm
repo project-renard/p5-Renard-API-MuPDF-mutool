@@ -6,10 +6,11 @@ use Capture::Tiny qw(capture);
 use XML::Simple;
 use Alien::MuPDF 0.007;
 use Path::Tiny;
-use Function::Parameters;
 
 use Log::Any qw($log);
 use constant MUPDF_DEFAULT_RESOLUTION => 72; # dpi
+
+use Renard::Incunabula::MuPDF::mutool::ObjectParser;
 
 BEGIN {
 	our $MUTOOL_PATH = Alien::MuPDF->mutool_path;
@@ -284,6 +285,15 @@ fun get_mutool_get_object_raw($pdf_filename, $object_id) {
 	);
 
 	$object_text;
+}
+
+fun get_mutool_get_info_object_parsed( $pdf_filename ) {
+	my $trailer = Renard::Incunabula::MuPDF::mutool::ObjectParser->new(
+		filename => $pdf_filename,
+		string => Renard::Incunabula::MuPDF::mutool::get_mutool_get_trailer_raw($pdf_filename),
+	);
+
+	my $info = $trailer->resolve_key('Info');
 }
 
 
