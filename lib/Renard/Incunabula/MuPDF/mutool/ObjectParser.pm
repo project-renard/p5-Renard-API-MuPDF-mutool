@@ -5,6 +5,19 @@ package Renard::Incunabula::MuPDF::mutool::ObjectParser;
 use Moo;
 use Renard::Incunabula::Common::Types qw(Str Bool File InstanceOf);
 
+=head1 Types
+
+  TypeString
+  TypeNumber
+  TypeReference
+  TypeDictionary
+  TypeDate
+  TypeArray
+
+The listed types are an enum for the kind of datatypes stored in the C<type>
+attribute.
+
+=cut
 use constant {
 	TypeString     => 1,
 	TypeNumber     => 2,
@@ -14,6 +27,11 @@ use constant {
 	TypeArray      => 6,
 };
 
+=attr filename
+
+A required C<File> attribute that represents the location of the PDF file.
+
+=cut
 has filename => (
 	is => 'ro',
 	isa => File,
@@ -21,22 +39,51 @@ has filename => (
 	required => 1,
 );
 
+=attr string
+
+A required C<Str> attribute that represents the raw string output from
+C<mutool show>.
+
+=cut
 has string => (
 	is => 'ro',
 	isa => Str,
 	required => 1,
 );
 
+=attr is_toplevel
+
+An optional C<Bool> attribute that tells whether the data is top-level or not.
+This influences the parsing by removing the header from the C<mutool show>
+output.
+
+Default: C<true>
+
+=cut
 has is_toplevel => (
 	is => 'ro',
 	isa => Bool,
 	default => sub { 1 },
 );
 
+=method BUILD
+
+Initialises the object by parsing the input data.
+
+=cut
 method BUILD(@) {
 	$self->_parse;
 };
 
+=begin comment
+
+=method _parse
+
+A private method that parses the data in the C<string> attribute.
+
+=end comment
+
+=cut
 method _parse() {
 	my $text = $self->string;
 	chomp($text);
@@ -87,6 +134,15 @@ method _parse() {
 	}
 }
 
+=classmethod unescape
+
+  classmethod unescape((Str) $pdf_string )
+
+A class method that unescapes the escape sequences in a PDF string.
+
+Returns a C<Str>.
+
+=cut
 classmethod unescape((Str) $pdf_string ) {
 	my $new_string = $pdf_string;
 	# TABLE 3.2 Escape sequences in literal strings (pg. 54)
@@ -115,6 +171,33 @@ classmethod unescape((Str) $pdf_string ) {
 	$new_string;
 }
 
+=classmethod parse_date
+
+  classmethod parse_date( (Str) $date_string )
+
+A class method that parses PDF date strings which are in the form
+
+  D:YYYYMMDDHHmmSSOHH'mm'
+
+and returns a C<HashRef> in the form
+
+  Dict[
+    year   => Str,   # YYYY
+    month  => Str,   # MM: 01-12
+    day    => Str,   # DD: 01-31
+
+    hour   => Str,   # HH: 00-23
+    minute => Str,   # mm: 00-59
+    second => Str,   # SS: 00-59
+
+    tz     => Dict[
+      offset => Str, # O: /[-+Z]/
+      hour   => Str, # HH': 00-59
+      minute => Str, # mm': 00-59
+    ],
+  ]
+
+=cut
 classmethod parse_date( (Str) $date_string ) {
 	# § 3.8.3 Dates (pg. 160)
 	# (D:YYYYMMDDHHmmSSOHH'mm')
@@ -166,14 +249,35 @@ classmethod parse_date( (Str) $date_string ) {
 	$time;
 }
 
+=attr data
+
+A C<Str> containing the parsed data.
+
+=cut
 has data => (
 	is => 'rw',
 );
 
+=attr type
+
+Contains the type parsed in the C<data> attribute. See L</Types> for more
+information.
+
+=cut
 has type => (
 	is => 'rw',
 );
 
+=method resolve_key
+
+  method resolve_key( (Str) $key )
+
+A method that follows the reference IDs contained in the data for the until a
+non-reference type is found.
+
+Returns a C<Renard::Incunabula::MuPDF::mutool::ObjectParser> instance.
+
+=cut
 method resolve_key( (Str) $key ) {
 	return unless $self->type == $self->TypeDictionary
 		&& exists $self->data->{$key};
@@ -187,6 +291,14 @@ method resolve_key( (Str) $key ) {
 	return $value;
 }
 
+=method new_from_reference
+
+  method new_from_reference( (InstanceOf['Renard::Incunabula::MuPDF::mutool::ObjectParser']) $ref_obj )
+
+Returns an instance of C<Renard::Incunabula::MuPDF::mutool::ObjectParser> that
+follows the reference ID contained inside C<$ref_obj>.
+
+=cut
 method new_from_reference( (InstanceOf['Renard::Incunabula::MuPDF::mutool::ObjectParser']) $ref_obj ) {
 	return unless $ref_obj->type == $self->TypeReference;
 	my $ref_id = $ref_obj->data;

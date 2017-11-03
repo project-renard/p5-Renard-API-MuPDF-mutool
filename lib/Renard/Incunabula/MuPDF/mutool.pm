@@ -267,6 +267,13 @@ fun get_mutool_outline_simple($pdf_filename) {
 	return \@outline_items;
 }
 
+=func get_mutool_get_trailer_raw
+
+  fun get_mutool_get_trailer_raw($pdf_filename)
+
+Returns the trailer of the PDF file C<$pdf_filename> as a string.
+
+=cut
 fun get_mutool_get_trailer_raw($pdf_filename) {
 	my $trailer_text = _call_mutool(
 		qw(show),
@@ -277,6 +284,14 @@ fun get_mutool_get_trailer_raw($pdf_filename) {
 	$trailer_text;
 }
 
+=func get_mutool_get_object_raw
+
+  fun get_mutool_get_object_raw($pdf_filename, $object_id)
+
+Returns the object given by the ID C<$object_id> for PDF file C<$pdf_filename>
+as a string.
+
+=cut
 fun get_mutool_get_object_raw($pdf_filename, $object_id) {
 	my $object_text = _call_mutool(
 		qw(show),
@@ -287,6 +302,17 @@ fun get_mutool_get_object_raw($pdf_filename, $object_id) {
 	$object_text;
 }
 
+=func get_mutool_get_info_object_parsed
+
+  fun get_mutool_get_info_object_parsed( $pdf_filename )
+
+Returns the document information dictionary as a
+L<Renard::Incunabula::MuPDF::mutool::ObjectParser> object.
+
+See Table 10.2 on pg. 844 of the I<PDF Reference, version 1.7> to see the
+entries that usually used (e.g., Title, Author).
+
+=cut
 fun get_mutool_get_info_object_parsed( $pdf_filename ) {
 	my $trailer = Renard::Incunabula::MuPDF::mutool::ObjectParser->new(
 		filename => $pdf_filename,
