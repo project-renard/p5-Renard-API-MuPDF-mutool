@@ -10,6 +10,7 @@ use Renard::Incunabula::MuPDF::mutool::DateObject;
 
   TypeString
   TypeNumber
+  TypeBoolean
   TypeReference
   TypeDictionary
   TypeDate
@@ -22,10 +23,11 @@ attribute.
 use constant {
 	TypeString     => 1,
 	TypeNumber     => 2,
-	TypeReference  => 3,
-	TypeDictionary => 4,
-	TypeDate       => 5,
-	TypeArray      => 6,
+	TypeBoolean    => 3,
+	TypeReference  => 4,
+	TypeDictionary => 5,
+	TypeDate       => 6,
+	TypeArray      => 7,
 };
 
 =attr filename
@@ -117,6 +119,9 @@ method _parse() {
 		} elsif( $scalar =~ m|^(?<Number>\d+)$| ) {
 			$self->data($+{Number});
 			$self->type($self->TypeNumber);
+		} elsif( $scalar =~ m{^(?<Boolean>/True|/False)$} ) {
+			$self->data($+{Boolean} eq '/True');
+			$self->type($self->TypeBoolean);
 		} elsif( $scalar =~ /^\((?<String>.*)\)/ ) {
 			my $string = $+{String};
 			if( $string =~ /^D:/ ) {
