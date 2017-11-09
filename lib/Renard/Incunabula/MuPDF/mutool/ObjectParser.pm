@@ -139,7 +139,7 @@ method _parse() {
 			$self->data('NOT PARSED');
 			$self->type($self->TypeArray);
 		} else {
-			die "unknown type"; # uncoverable statement
+			die "unknown PDF type: $scalar"; # uncoverable statement
 		}
 	}
 }
