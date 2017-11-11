@@ -107,7 +107,7 @@ Returns a L<DateTime> representation of the date.
 
 =cut
 method as_DateTime() :ReturnType(InstanceOf['DateTime']) {
-	eval { require DateTime } or die "require DateTime";
+	eval { require DateTime; 1 } or die "require DateTime";
 
 	my $dt_hash = $self->data;
 	my $dt_timezone = 'floating';
