@@ -124,6 +124,29 @@ Returns an array of the outline of the PDF file C<$pdf_filename> as an
 C<ArrayRef[HashRef]> which corresponds to the C<items> attribute of
 L<Renard::Incunabula::Outline>.
 
+=head2 get_mutool_get_trailer_raw
+
+  fun get_mutool_get_trailer_raw($pdf_filename)
+
+Returns the trailer of the PDF file C<$pdf_filename> as a string.
+
+=head2 get_mutool_get_object_raw
+
+  fun get_mutool_get_object_raw($pdf_filename, $object_id)
+
+Returns the object given by the ID C<$object_id> for PDF file C<$pdf_filename>
+as a string.
+
+=head2 get_mutool_get_info_object_parsed
+
+  fun get_mutool_get_info_object_parsed( $pdf_filename )
+
+Returns the document information dictionary as a
+L<Renard::Incunabula::MuPDF::mutool::ObjectParser> object.
+
+See Table 10.2 on pg. 844 of the I<PDF Reference, version 1.7> to see the
+entries that usually used (e.g., Title, Author).
+
 =head1 SEE ALSO
 
 L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-Incunabula-MuPDF-mutool/>
