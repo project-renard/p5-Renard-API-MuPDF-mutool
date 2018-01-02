@@ -37,7 +37,7 @@ subtest 'Get characters for preface' => sub {
 	my $text_concat = "";
 
 	my $root = dpathi($stext);
-	my $char_iterator = $root->isearch( '/page/*/block/*/line/*/span/*/char/*' );
+	my $char_iterator = $root->isearch( '/page/*/block/*/line/*/font/*/char/*' );
 	while( $char_iterator->isnt_exhausted ) {
 		$text_concat .= $char_iterator->value->deref->{c};
 	}

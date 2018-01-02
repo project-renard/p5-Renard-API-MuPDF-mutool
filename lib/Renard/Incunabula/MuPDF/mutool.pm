@@ -109,27 +109,25 @@ number C<$pdf_page_no> of the PDF file C<$pdf_filename>.
 The XML format is defined by the output of C<mutool> looks like this (for page
 23 of the C<pdf_reference_1-7.pdf> file):
 
-  <document name="test-data/test-data/PDF/Adobe/pdf_reference_1-7.pdf">
-    <page width="531" height="666">
-      <block bbox="261.18 616.16394 269.77765 625.2532">
-        <line bbox="261.18 616.16394 269.77765 625.2532">
-          <span bbox="261.18 616.16394 269.77765 625.2532" font="MyriadPro-Semibold" size="7.98">
-            <char bbox="261.18 616.16394 265.50037 625.2532" x="261.18" y="623.2582" c="2"/>
-            <char bbox="265.50037 616.16394 269.77765 625.2532" x="265.50037" y="623.2582" c="3"/>
-          </span>
+  <?xml version="1.0"?>
+  <document name="(null)">
+    <page height="666" width="531">
+      <block bbox="261.18 616.16397 269.77766 625.2532">
+        <line bbox="261.18 616.16397 269.77766 625.2532" dir="1 0" wmode="0">
+          <font name="MyriadPro-Semibold" size="7.98">
+            <char bbox="261.18 616.16397 265.45729 625.2532" c="2" x="261.18" y="623.2582"/>
+            <char bbox="265.50038 616.16397 269.77766 625.2532" c="3" x="265.50038" y="623.2582"/>
+          </font>
         </line>
       </block>
-      <block bbox="225.78 88.20229 305.18158 117.93829">
-        <line bbox="225.78 88.20229 305.18158 117.93829">
-          <span bbox="225.78 88.20229 305.18158 117.93829" font="MyriadPro-Bold" size="24">
-            <char bbox="225.78 88.20229 239.5176 117.93829" x="225.78" y="111.93829" c="P"/>
-            <char bbox="239.5176 88.20229 248.4552 117.93829" x="239.5176" y="111.93829" c="r"/>
-            <char bbox="248.4552 88.20229 261.1128 117.93829" x="248.4552" y="111.93829" c="e"/>
-            <char bbox="261.1128 88.20229 269.28238 117.93829" x="261.1128" y="111.93829" c="f"/>
-            <char bbox="269.28238 88.20229 281.93997 117.93829" x="269.28238" y="111.93829" c="a"/>
-            <char bbox="281.93997 88.20229 292.50958 117.93829" x="281.93997" y="111.93829" c="c"/>
-            <char bbox="292.50958 88.20229 305.18158 117.93829" x="292.50958" y="111.93829" c="e"/>
-          </span>
+      <block bbox="225.78 88.20229 305.18159 117.93829">
+        <line bbox="225.78 88.20229 305.18159 117.93829" dir="1 0" wmode="0">
+          <font name="MyriadPro-Bold" size="24">
+            <char bbox="225.78 88.20229 239.724 117.93829" c="P" x="225.78" y="111.93829"/>
+            <char bbox="239.5176 88.20229 248.63759 117.93829" c="r" x="239.5176" y="111.93829"/>
+            <char bbox="248.4552 88.20229 261.1272 117.93829" c="e" x="248.4552" y="111.93829"/>
+            <char bbox="261.1128 88.20229 269.29679 117.93829" c="f" x="261.1128" y="111.93829"/>
+          </font>
         </line>
       </block>
     </page>
@@ -142,7 +140,7 @@ Simplified, the high-level structure looks like:
       a block is either:
         - stext
             <line> -> [list of lines] (all have same baseline)
-              <span> -> [list of spans] (horizontal spaces over a line)
+              <font> -> [list of fonts] (horizontal spaces over a line)
                 <char> -> [list of chars]
         - image
             # TODO document the image data from mutool
@@ -178,7 +176,8 @@ fun get_mutool_text_stext_xml($pdf_filename, $pdf_page_no) {
 	);
 
 	my $stext = XMLin( $stext_xml,
-		ForceArray => [ qw(page block line span char) ] );
+		KeyAttr => [],
+		ForceArray => [ qw(page block line font char) ] );
 
 	return $stext;
 }
@@ -231,6 +230,7 @@ fun get_mutool_page_info_xml($pdf_filename) {
 	my $page_info_xml = get_mutool_page_info_raw( $pdf_filename );
 
 	my $page_info = XMLin( $page_info_xml,
+		KeyAttr => [],
 		ForceArray => [ qw(page) ] );
 
 	return $page_info;
