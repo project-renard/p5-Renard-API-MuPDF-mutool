@@ -5,10 +5,14 @@ package Renard::Incunabula::MuPDF::mutool::ObjectParser;
 use Moo;
 use Renard::Incunabula::Common::Types qw(Str Bool File InstanceOf);
 use Renard::Incunabula::MuPDF::mutool::DateObject;
+use Encode qw(decode encode_utf8);
+use utf8;
 
 =head1 Types
 
   TypeString
+  TypeStringASCII
+  TypeStringUTF16BE
   TypeNumber
   TypeBoolean
   TypeReference
@@ -21,13 +25,15 @@ attribute.
 
 =cut
 use constant {
-	TypeString     => 1,
-	TypeNumber     => 2,
-	TypeBoolean    => 3,
-	TypeReference  => 4,
-	TypeDictionary => 5,
-	TypeDate       => 6,
-	TypeArray      => 7,
+	TypeString            => 1,
+	TypeStringASCII       => 2,
+	TypeStringUTF16BE     => 3,
+	TypeNumber            => 4,
+	TypeBoolean           => 5,
+	TypeReference         => 6,
+	TypeDictionary        => 7,
+	TypeDate              => 8,
+	TypeArray             => 9,
 };
 
 =attr filename
@@ -132,9 +138,12 @@ method _parse() {
 				);
 				$self->type($self->TypeDate);
 			} else {
-				$self->data($self->unescape($string));
-				$self->type($self->TypeString);
+				$self->data($self->unescape_ascii_string($string));
+				$self->type($self->TypeStringASCII);
 			}
+		} elsif( $scalar =~ /^<(?<String>\s*FE\s*FF[^>]*)>/ ) {
+			$self->data( $self->decode_hex_utf16be( $+{String} ) );
+			$self->type($self->TypeStringUTF16BE);
 		} elsif( $scalar =~ /^\[/ ) {
 			$self->data('NOT PARSED');
 			$self->type($self->TypeArray);
@@ -144,16 +153,16 @@ method _parse() {
 	}
 }
 
-=classmethod unescape
+=classmethod unescape_ascii_string
 
-  classmethod unescape((Str) $pdf_string )
+  classmethod unescape_ascii_string((Str) $pdf_string )
 
 A class method that unescapes the escape sequences in a PDF string.
 
 Returns a C<Str>.
 
 =cut
-classmethod unescape((Str) $pdf_string ) {
+classmethod unescape_ascii_string((Str) $pdf_string ) {
 	my $new_string = $pdf_string;
 	# TABLE 3.2 Escape sequences in literal strings (pg. 54)
 	my %map = (
@@ -179,6 +188,54 @@ classmethod unescape((Str) $pdf_string ) {
 		/eg;
 
 	$new_string;
+}
+
+=classmethod decode_hex_utf16be
+
+  classmethod decode_hex_utf16be( (Str) $pdf_string )
+
+A class method that decodes data stored in angle brackets.
+
+Currently only implements Unicode character encoding for what is called a
+I<UTF-16BE encoded string with a leading byte order marker> using
+B<ASCIIHexDecode>:
+
+=for :list
+* first two bytes must be the Unicode byte order marker (C<U+FEFF>),
+* one byte per each pair of hex characters (C<< /[0-9A-F]{2}/ >>))
+* whitespace is ignored
+
+
+See the following parts of PDF Reference 1.7:
+
+
+=for :list
+* Section 3.3.1 ASCIIHexDecode Filter (pg. 69) and
+* Section 3.8.1 Text String Type (pg. 158)
+
+
+Returns a C<Str>.
+
+=cut
+classmethod decode_hex_utf16be( (Str) $pdf_string ) {
+	if( $pdf_string =~ /^FE\s*FF/ ) {
+		# it is a UTF-16BE string
+		my $string = decode('UTF-16',
+			pack(
+				'H*',
+				# remove strings
+				$pdf_string =~ s/\s+//gr
+			)
+		);
+
+		# This is a text string, so we can enable the UTF8 flag.
+		utf8::upgrade($string);
+
+		return $string;
+	} else {
+		# Possibly PDFDocEncoded string type?
+		die "Not a UTF-16BE hex string";
+	}
 }
 
 =attr data
