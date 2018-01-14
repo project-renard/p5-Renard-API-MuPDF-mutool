@@ -1,3 +1,13 @@
+0.005
+
+  Features
+
+   - Add support for UTF-16BE hex strings. These may appear in non-ASCII
+     metadata.
+
+     See <https://github.com/project-renard/p5-Renard-Incunabula-MuPDF-mutool/issues/7>,
+     <https://github.com/project-renard/p5-Renard-Incunabula-MuPDF-mutool/pull/8>.
+
 0.004 2018-01-06 00:45:10-0600
 
   Features
