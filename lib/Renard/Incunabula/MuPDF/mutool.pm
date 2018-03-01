@@ -253,7 +253,8 @@ fun get_mutool_outline_simple($pdf_filename) {
 	);
 
 	my @outline_items = ();
-	open my $outline_fh, '<:encoding(UTF-8):crlf', \$outline_text;
+	utf8::upgrade($outline_text);
+	open my $outline_fh, '<:crlf', \$outline_text;
 	while( defined( my $line = <$outline_fh> ) ) {
 		$line =~ /^(?<indent>\t*)(?<text>.*)\t#(?<page>\d+)(,(?<dx>\d+),(?<dy>\d+))?$/;
 		my %copy = %+;
@@ -281,7 +282,8 @@ fun get_mutool_get_trailer_raw($pdf_filename) {
 		qw(trailer)
 	);
 
-	open my $trailer_fh, '<:encoding(UTF-8):crlf', \$trailer_text;
+	utf8::upgrade($trailer_text);
+	open my $trailer_fh, '<:crlf', \$trailer_text;
 	do { local $/ = ''; <$trailer_fh> };
 }
 
@@ -300,7 +302,8 @@ fun get_mutool_get_object_raw($pdf_filename, $object_id) {
 		$object_id,
 	);
 
-	open my $object_fh, '<:encoding(UTF-8):crlf', \$object_text;
+	utf8::upgrade($object_text);
+	open my $object_fh, '<:crlf', \$object_text;
 	do { local $/ = ''; <$object_fh> };
 }
 
