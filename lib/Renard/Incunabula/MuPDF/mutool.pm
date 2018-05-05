@@ -256,10 +256,21 @@ fun get_mutool_outline_simple($pdf_filename) {
 	utf8::upgrade($outline_text);
 	open my $outline_fh, '<:crlf', \$outline_text;
 	while( defined( my $line = <$outline_fh> ) ) {
-		$line =~ /^(?<indent>\t*)(?<text>.*)\t#(?<page>\d+)(,(?<dx>\d+),(?<dy>\d+))?$/;
+		$line =~ /^
+			(?<indent>\t*)
+			(?<text>.*)
+			\t
+			(?<reference>
+				( \# (?<page>\d+)(,(?<dx>\d+),(?<dy>\d+))? )
+				|
+				\Q(null)\E
+			)
+			$
+		/x;
 		my %copy = %+;
 		$copy{level} = length $copy{indent};
 		delete $copy{indent};
+		delete $copy{reference};
 		# not storing the offsets yet and not every line has offsets
 		delete @copy{qw(dx dy)};
 		push @outline_items, \%copy;
