@@ -6,7 +6,7 @@ use lib 't/lib';
 use Renard::Incunabula::Devel::TestHelper;
 
 use Renard::Incunabula::Common::Setup;
-use Renard::Incunabula::MuPDF::mutool;
+use Renard::Incunabula::API::MuPDF::mutool;
 use Data::DPath qw(dpathi);
 
 my $pdf_ref_path = try {
@@ -18,12 +18,12 @@ my $pdf_ref_path = try {
 plan tests => 6;
 
 subtest 'PDF page to PNG' => sub {
-	my $png_data = Renard::Incunabula::MuPDF::mutool::get_mutool_pdf_page_as_png( $pdf_ref_path, 1, 1.0 );
+	my $png_data = Renard::Incunabula::API::MuPDF::mutool::get_mutool_pdf_page_as_png( $pdf_ref_path, 1, 1.0 );
 	like $png_data, qr/^\x{89}PNG/, 'data has PNG stream magic number';
 };
 
 subtest 'Get bounds of PDF page' => sub {
-	my $bounds = Renard::Incunabula::MuPDF::mutool::get_mutool_page_info_xml( $pdf_ref_path );
+	my $bounds = Renard::Incunabula::API::MuPDF::mutool::get_mutool_page_info_xml( $pdf_ref_path );
 
 	my $first_page = $bounds->{page}[0];
 	is( $first_page->{pagenum}, 1, 'page number one is the first element of pages key' );
@@ -33,7 +33,7 @@ subtest 'Get bounds of PDF page' => sub {
 subtest 'Get characters for preface' => sub {
 	my $preface_page = 23;
 
-	my $stext = Renard::Incunabula::MuPDF::mutool::get_mutool_text_stext_xml( $pdf_ref_path, $preface_page );
+	my $stext = Renard::Incunabula::API::MuPDF::mutool::get_mutool_text_stext_xml( $pdf_ref_path, $preface_page );
 	my $text_concat = "";
 
 	my $root = dpathi($stext);
@@ -48,7 +48,7 @@ subtest 'Get characters for preface' => sub {
 };
 
 subtest 'Get outline of PDF document' => sub {
-	my $outline_data = Renard::Incunabula::MuPDF::mutool::get_mutool_outline_simple( $pdf_ref_path );
+	my $outline_data = Renard::Incunabula::API::MuPDF::mutool::get_mutool_outline_simple( $pdf_ref_path );
 
 	cmp_deeply $outline_data,
 		superbagof({
@@ -59,18 +59,18 @@ subtest 'Get outline of PDF document' => sub {
 };
 
 subtest 'Get PDF trailer and info object raw' => sub {
-	my $trailer = Renard::Incunabula::MuPDF::mutool::get_mutool_get_trailer_raw( $pdf_ref_path );
+	my $trailer = Renard::Incunabula::API::MuPDF::mutool::get_mutool_get_trailer_raw( $pdf_ref_path );
 
 	my $info_obj_id = 109959;
 
 	like $trailer , qr|\Q/Info $info_obj_id 0 R\E|, 'trailer has reference to info object';
 
-	my $info_obj = Renard::Incunabula::MuPDF::mutool::get_mutool_get_object_raw( $pdf_ref_path, $info_obj_id );
+	my $info_obj = Renard::Incunabula::API::MuPDF::mutool::get_mutool_get_object_raw( $pdf_ref_path, $info_obj_id );
 	like $info_obj, qr|\Q/Author (Adobe Systems Incorporated)\E|, 'info object has author information';
 };
 
 subtest 'Get parsed info object' => sub {
-	my $info = Renard::Incunabula::MuPDF::mutool::get_mutool_get_info_object_parsed( $pdf_ref_path );
+	my $info = Renard::Incunabula::API::MuPDF::mutool::get_mutool_get_info_object_parsed( $pdf_ref_path );
 
 	is $info->resolve_key('Subject')->data, 'Adobe Portable Document Format (PDF)', "correct subject";
 };
