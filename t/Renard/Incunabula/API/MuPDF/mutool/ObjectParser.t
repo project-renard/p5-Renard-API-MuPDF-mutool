@@ -4,7 +4,7 @@ use utf8;
 use Test::Most tests => 3;
 
 use Renard::Incunabula::Common::Setup;
-use Renard::Incunabula::MuPDF::mutool::ObjectParser;
+use Renard::Incunabula::API::MuPDF::mutool::ObjectParser;
 
 subtest "Unsecape" => sub {
 	my @tests = (
@@ -17,7 +17,7 @@ subtest "Unsecape" => sub {
 
 	for my $test (@tests) {
 		is(
-			Renard::Incunabula::MuPDF::mutool::ObjectParser->unescape_ascii_string( $test->{input} ),
+			Renard::Incunabula::API::MuPDF::mutool::ObjectParser->unescape_ascii_string( $test->{input} ),
 			$test->{output},
 			"unescape @{[ $test->{input} ]}"
 		);
@@ -33,13 +33,13 @@ subtest "Boolean" => sub {
 	plan tests => 0+@tests;
 
 	for my $test (@tests) {
-		my $parse = Renard::Incunabula::MuPDF::mutool::ObjectParser->new(
+		my $parse = Renard::Incunabula::API::MuPDF::mutool::ObjectParser->new(
 			filename => __FILE__,
 			string => $test->{input}, is_toplevel => 0
 		);
 		subtest "Input @{[ $test->{input} ]}" => sub  {
 			ok( $test->{output} ? $parse->data : ! $parse->data, "Correct parsing of boolean" );
-			is( $parse->type, Renard::Incunabula::MuPDF::mutool::ObjectParser->TypeBoolean, 'Is tagged as Boolean type' );
+			is( $parse->type, Renard::Incunabula::API::MuPDF::mutool::ObjectParser->TypeBoolean, 'Is tagged as Boolean type' );
 		}
 	}
 };
@@ -61,7 +61,7 @@ subtest "Decode hex UTF-16BE" => sub {
 		binmode STDOUT, ':encoding(UTF-8)';
 		binmode STDERR, ':encoding(UTF-8)';
 		is(
-			Renard::Incunabula::MuPDF::mutool::ObjectParser->decode_hex_utf16be( $test->{input} ),
+			Renard::Incunabula::API::MuPDF::mutool::ObjectParser->decode_hex_utf16be( $test->{input} ),
 			$test->{output},
 			"UTF-16BE decode @{[ $test->{input} ]}"
 		);

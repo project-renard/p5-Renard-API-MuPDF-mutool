@@ -1,5 +1,5 @@
 use Renard::Incunabula::Common::Setup;
-package Renard::Incunabula::MuPDF::mutool::DateObject;
+package Renard::Incunabula::API::MuPDF::mutool::DateObject;
 # ABSTRACT: An object to store the date
 
 use Moo;
