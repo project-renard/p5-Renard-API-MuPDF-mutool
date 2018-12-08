@@ -1,5 +1,5 @@
 use Renard::Incunabula::Common::Setup;
-package Renard::Incunabula::API::MuPDF::mutool;
+package Renard::API::MuPDF::mutool;
 # ABSTRACT: Retrieve PDF image and text data via MuPDF's mutool
 
 use Capture::Tiny qw(capture);
@@ -10,7 +10,7 @@ use Path::Tiny;
 use Log::Any qw($log);
 use constant MUPDF_DEFAULT_RESOLUTION => 72; # dpi
 
-use Renard::Incunabula::API::MuPDF::mutool::ObjectParser;
+use Renard::API::MuPDF::mutool::ObjectParser;
 
 BEGIN {
 	our $MUTOOL_PATH = Alien::MuPDF->mutool_path;
@@ -28,7 +28,7 @@ This function dies if C<mutool> unsuccessfully exits.
 
 =cut
 fun _call_mutool( @mutool_args ) {
-	my @args = ( $Renard::Incunabula::API::MuPDF::mutool::MUTOOL_PATH, @mutool_args );
+	my @args = ( $Renard::API::MuPDF::mutool::MUTOOL_PATH, @mutool_args );
 	my ($stdout, $exit);
 
 	# Note: The code below is marked as uncoverable because it only applies
@@ -323,16 +323,16 @@ fun get_mutool_get_object_raw($pdf_filename, $object_id) {
   fun get_mutool_get_info_object_parsed( $pdf_filename )
 
 Returns the document information dictionary as a
-L<Renard::Incunabula::API::MuPDF::mutool::ObjectParser> object.
+L<Renard::API::MuPDF::mutool::ObjectParser> object.
 
 See Table 10.2 on pg. 844 of the I<PDF Reference, version 1.7> to see the
 entries that usually used (e.g., Title, Author).
 
 =cut
 fun get_mutool_get_info_object_parsed( $pdf_filename ) {
-	my $trailer = Renard::Incunabula::API::MuPDF::mutool::ObjectParser->new(
+	my $trailer = Renard::API::MuPDF::mutool::ObjectParser->new(
 		filename => $pdf_filename,
-		string => Renard::Incunabula::API::MuPDF::mutool::get_mutool_get_trailer_raw($pdf_filename),
+		string => Renard::API::MuPDF::mutool::get_mutool_get_trailer_raw($pdf_filename),
 	);
 
 	my $info = $trailer->resolve_key('Info');
@@ -345,4 +345,4 @@ __END__
 
 =head1 SEE ALSO
 
-L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-Incunabula-API-MuPDF-mutool/>
+L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-API-MuPDF-mutool/>

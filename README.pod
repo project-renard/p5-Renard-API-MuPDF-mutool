@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-Renard::Incunabula::MuPDF::mutool - Retrieve PDF image and text data via MuPDF's mutool
+Renard::API::MuPDF::mutool - Retrieve PDF image and text data via MuPDF's mutool
 
 =head1 VERSION
 
@@ -140,14 +140,14 @@ as a string.
   fun get_mutool_get_info_object_parsed( $pdf_filename )
 
 Returns the document information dictionary as a
-L<Renard::Incunabula::MuPDF::mutool::ObjectParser> object.
+L<Renard::API::MuPDF::mutool::ObjectParser> object.
 
 See Table 10.2 on pg. 844 of the I<PDF Reference, version 1.7> to see the
 entries that usually used (e.g., Title, Author).
 
 =head1 SEE ALSO
 
-L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-Incunabula-MuPDF-mutool/>
+L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-API-MuPDF-mutool/>
 
 =head1 AUTHOR
 

@@ -1,10 +1,10 @@
 use Renard::Incunabula::Common::Setup;
-package Renard::Incunabula::API::MuPDF::mutool::ObjectParser;
+package Renard::API::MuPDF::mutool::ObjectParser;
 # ABSTRACT: Parser for the output of C<mutool show>
 
 use Moo;
 use Renard::Incunabula::Common::Types qw(Str Bool File InstanceOf);
-use Renard::Incunabula::API::MuPDF::mutool::DateObject;
+use Renard::API::MuPDF::mutool::DateObject;
 use Encode qw(decode encode_utf8);
 use utf8;
 
@@ -108,7 +108,7 @@ method _parse() {
 		my $line;
 		while( ">>" ne ($line = shift @lines)) {
 			next unless $line =~ m|^ \s* / (?<Key>\w+) \s+ (?<Value>.*) $|x;
-			$data->{$+{Key}} = Renard::Incunabula::API::MuPDF::mutool::ObjectParser->new(
+			$data->{$+{Key}} = Renard::API::MuPDF::mutool::ObjectParser->new(
 				filename => $self->filename,
 				string => $+{Value},
 				is_toplevel => 0,
@@ -132,7 +132,7 @@ method _parse() {
 			my $string = $+{String};
 			if( $string =~ /^D:/ ) {
 				$self->data(
-					Renard::Incunabula::API::MuPDF::mutool::DateObject->new(
+					Renard::API::MuPDF::mutool::DateObject->new(
 						string => $string
 					)
 				);
@@ -264,7 +264,7 @@ has type => (
 A method that follows the reference IDs contained in the data for the until a
 non-reference type is found.
 
-Returns a C<Renard::Incunabula::API::MuPDF::mutool::ObjectParser> instance.
+Returns a C<Renard::API::MuPDF::mutool::ObjectParser> instance.
 
 =cut
 method resolve_key( (Str) $key ) {
@@ -282,18 +282,18 @@ method resolve_key( (Str) $key ) {
 
 =method new_from_reference
 
-  method new_from_reference( (InstanceOf['Renard::Incunabula::API::MuPDF::mutool::ObjectParser']) $ref_obj )
+  method new_from_reference( (InstanceOf['Renard::API::MuPDF::mutool::ObjectParser']) $ref_obj )
 
-Returns an instance of C<Renard::Incunabula::API::MuPDF::mutool::ObjectParser> that
+Returns an instance of C<Renard::API::MuPDF::mutool::ObjectParser> that
 follows the reference ID contained inside C<$ref_obj>.
 
 =cut
-method new_from_reference( (InstanceOf['Renard::Incunabula::API::MuPDF::mutool::ObjectParser']) $ref_obj ) {
+method new_from_reference( (InstanceOf['Renard::API::MuPDF::mutool::ObjectParser']) $ref_obj ) {
 	return unless $ref_obj->type == $self->TypeReference;
 	my $ref_id = $ref_obj->data;
 	$self->new(
 		filename => $self->filename,
-		string => Renard::Incunabula::API::MuPDF::mutool::get_mutool_get_object_raw($self->filename, $ref_id),
+		string => Renard::API::MuPDF::mutool::get_mutool_get_object_raw($self->filename, $ref_id),
 	);
 }
 
