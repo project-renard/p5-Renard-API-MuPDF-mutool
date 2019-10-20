@@ -19,7 +19,7 @@ plan tests => 6;
 
 subtest 'PDF page to PNG' => sub {
 	my $png_data = Renard::API::MuPDF::mutool::get_mutool_pdf_page_as_png( $pdf_ref_path, 1, 1.0 );
-	like $png_data, qr/^\x{89}PNG/, 'data has PNG stream magic number';
+	is substr($png_data, 0,4), "\x{89}PNG", 'data has PNG stream magic number';
 };
 
 subtest 'Get bounds of PDF page' => sub {
