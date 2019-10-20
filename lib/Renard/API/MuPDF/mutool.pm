@@ -257,8 +257,9 @@ fun get_mutool_outline_simple($pdf_filename) {
 	open my $outline_fh, '<:crlf', \$outline_text;
 	while( defined( my $line = <$outline_fh> ) ) {
 		$line =~ /^
+			(?<prefix>[+|-])
 			(?<indent>\t*)
-			(?<text>.*)
+			"(?<text>.*)"
 			\t
 			(?<reference>
 				( \# (?<page>\d+)(,(?<dx>\d+),(?<dy>\d+))? )
@@ -268,7 +269,10 @@ fun get_mutool_outline_simple($pdf_filename) {
 			$
 		/x;
 		my %copy = %+;
-		$copy{level} = length $copy{indent};
+		$copy{level} = length($copy{indent}) - 1;
+		$copy{text} =~ s/\\x([0-9A-F]{2})/chr(hex($1))/ge;
+		$copy{open} = $copy{prefix} eq '-';
+		delete $copy{prefix};
 		delete $copy{indent};
 		delete $copy{reference};
 		# not storing the offsets yet and not every line has offsets

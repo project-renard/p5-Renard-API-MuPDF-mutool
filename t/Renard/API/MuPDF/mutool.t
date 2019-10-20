@@ -53,6 +53,7 @@ subtest 'Get outline of PDF document' => sub {
 	cmp_deeply $outline_data,
 		superbagof({
 			level => 2,
+			open => !!0,
 			text => '1.2.6 General Features',
 			page => 31 }),
 		'has expected outline item';
