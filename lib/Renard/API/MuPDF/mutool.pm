@@ -233,6 +233,27 @@ fun get_mutool_page_info_xml($pdf_filename) {
 		KeyAttr => [],
 		ForceArray => [ qw(page) ] );
 
+	my $root_media_box_p = Renard::API::MuPDF::mutool::ObjectParser->new(
+		filename => $pdf_filename,
+		string => Renard::API::MuPDF::mutool::get_mutool_get_object_raw($pdf_filename, 'Root/Pages/MediaBox'),
+		is_toplevel => 0,
+	);
+	my $root_media_box;
+	if( $root_media_box_p->data ) {
+		$root_media_box->{l} = $root_media_box_p->data->[0];
+		$root_media_box->{b} = $root_media_box_p->data->[1];
+
+		$root_media_box->{r} = $root_media_box_p->data->[2];
+		$root_media_box->{t} = $root_media_box_p->data->[3];
+	}
+
+	for my $page_hash (@{ $page_info->{page} }) {
+		unless( exists $page_hash->{CropBox} ) {
+			my $media_box = exists $page_hash->{MediaBox} ? $page_hash->{MediaBox} : $root_media_box;
+			$page_hash->{CropBox} = { %$media_box };
+		}
+	}
+
 	return $page_info;
 }
 
