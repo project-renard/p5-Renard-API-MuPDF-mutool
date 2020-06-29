@@ -10,6 +10,7 @@ use utf8;
 
 =head1 Types
 
+  TypeNull
   TypeString
   TypeStringASCII
   TypeStringUTF16BE
@@ -25,6 +26,7 @@ attribute.
 
 =cut
 use constant {
+	TypeNull              => 0,
 	TypeString            => 1,
 	TypeStringASCII       => 2,
 	TypeStringUTF16BE     => 3,
@@ -119,7 +121,10 @@ method _parse() {
 		$self->type( $self->TypeDictionary );
 	} else {
 		my $scalar = $lines[0];
-		if( $scalar =~ m|^(?<Id>\d+) 0 R$| ) {
+		if( $scalar =~ m|^(?<Null>null)$| ) {
+			$self->data(undef);
+			$self->type($self->TypeNull);
+		} elsif( $scalar =~ m|^(?<Id>\d+) 0 R$| ) {
 			$self->data($+{Id});
 			$self->type($self->TypeReference);
 		} elsif( $scalar =~ m|^(?<Number>\d+)$| ) {
