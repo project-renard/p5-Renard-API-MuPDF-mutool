@@ -5,6 +5,7 @@ package Renard::API::MuPDF::mutool::ObjectParser;
 use Moo;
 use Renard::Incunabula::Common::Types qw(Str Bool File InstanceOf);
 use Renard::API::MuPDF::mutool::DateObject;
+use Regexp::Common;
 use Encode qw(decode encode_utf8);
 use utf8;
 
@@ -149,6 +150,9 @@ method _parse() {
 		} elsif( $scalar =~ /^<(?<String>\s*FE\s*FF[^>]*)>/ ) {
 			$self->data( $self->decode_hex_utf16be( $+{String} ) );
 			$self->type($self->TypeStringUTF16BE);
+		} elsif( $scalar =~ /^\[ (?<Elements>$RE{list}{-pat => $RE{num}{real}}{-sep=>' '}) \]$/ ) {
+			$self->data([ split ' ', $+{Elements} ]);
+			$self->type($self->TypeArray);
 		} elsif( $scalar =~ /^\[/ ) {
 			$self->data('NOT PARSED');
 			$self->type($self->TypeArray);
