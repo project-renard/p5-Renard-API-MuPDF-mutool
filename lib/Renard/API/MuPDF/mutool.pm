@@ -67,6 +67,12 @@ fun _call_mutool( @mutool_args ) {
 		$stdout = path( $temp_fh->filename )->slurp_raw;     # uncoverable statement
 		$exit = $?;                                          # uncoverable statement
 	} else {
+		# Make sure STDOUT is :raw
+		open my $dup, ">&=", *STDOUT or die $!;
+		local *STDOUT;
+		open(STDOUT, ">&=", $dup);
+		binmode *STDOUT, ':raw';
+
 		($stdout, undef, $exit) = capture {
 			$log->infof("running mutool: %s", \@args);
 			system( @args );
