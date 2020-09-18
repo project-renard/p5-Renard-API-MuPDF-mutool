@@ -289,7 +289,7 @@ fun get_mutool_outline_simple($pdf_filename) {
 			"(?<text>.*)"
 			\t
 			(?<reference>
-				( \# (?<page>\d+)(,(?<dx>\d+),(?<dy>\d+))? )
+				( \# (?<page>\d+)(,(?<dx>-?\d+),(?<dy>-?\d+))? )
 				|
 				\Q(null)\E
 			)
