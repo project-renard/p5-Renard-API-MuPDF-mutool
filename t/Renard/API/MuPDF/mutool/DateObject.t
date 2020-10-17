@@ -3,7 +3,7 @@
 use Test::Most tests => 2;
 
 use Renard::Incunabula::Common::Setup;
-use Renard::Incunabula::MuPDF::mutool::DateObject;
+use Renard::API::MuPDF::mutool::DateObject;
 
 subtest "Date parsing" => sub {
 	my @tests = (
@@ -28,7 +28,7 @@ subtest "Date parsing" => sub {
 
 	for my $test (@tests) {
 		subtest $test->{input} => sub {
-			my $date = Renard::Incunabula::MuPDF::mutool::DateObject->new(
+			my $date = Renard::API::MuPDF::mutool::DateObject->new(
 				string => $test->{input}
 			);
 			is_deeply( $date->data, $test->{output}{data}, 'correct data' );
@@ -70,7 +70,7 @@ subtest "as DateTime" => sub {
 
 	for my $tz (@tz_data_tests) {
 		subtest $tz->{note} => sub {
-			my $dt = Renard::Incunabula::MuPDF::mutool::DateObject->new(
+			my $dt = Renard::API::MuPDF::mutool::DateObject->new(
 				string => $date_string_base . $tz->{input}
 			)->as_DateTime;
 			is( $dt, $datetime_base, 'DateTime string correct' );

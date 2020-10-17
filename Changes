@@ -1,3 +1,29 @@
+0.005
+
+  Renamed from Renard::Incunabula::MuPDF::mutool (previous version
+  <https://metacpan.org/release/ZMUGHAL/Renard-Incunabula-MuPDF-mutool-0.004>).
+
+  Features
+
+   - Add support for UTF-16BE hex strings. These may appear in non-ASCII
+     metadata.
+
+     See <https://github.com/project-renard/p5-Renard-Incunabula-MuPDF-mutool/issues/7>,
+     <https://github.com/project-renard/p5-Renard-Incunabula-MuPDF-mutool/pull/8>.
+
+   - Handle (null) reference in outline.
+
+   - Make sure each page has a CropBox.
+
+  Refactoring
+
+   - Renaming as mentioned above.
+
+  Bug fixes
+
+   - Update outline parsing for newer version of `mutool` which adds if
+     outline item is open or closed.
+
 0.004 2018-01-06 00:45:10-0600
 
   Features

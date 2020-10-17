@@ -1,7 +1,7 @@
 use Renard::Incunabula::Common::Setup;
-package Renard::Incunabula::MuPDF::mutool;
+package Renard::API::MuPDF::mutool;
 # ABSTRACT: Retrieve PDF image and text data via MuPDF's mutool
-$Renard::Incunabula::MuPDF::mutool::VERSION = '0.004';
+$Renard::API::MuPDF::mutool::VERSION = '0.005';
 use Capture::Tiny qw(capture);
 use XML::Simple;
 use Alien::MuPDF 0.007;
@@ -10,14 +10,14 @@ use Path::Tiny;
 use Log::Any qw($log);
 use constant MUPDF_DEFAULT_RESOLUTION => 72; # dpi
 
-use Renard::Incunabula::MuPDF::mutool::ObjectParser;
+use Renard::API::MuPDF::mutool::ObjectParser;
 
 BEGIN {
 	our $MUTOOL_PATH = Alien::MuPDF->mutool_path;
 }
 
 fun _call_mutool( @mutool_args ) {
-	my @args = ( $Renard::Incunabula::MuPDF::mutool::MUTOOL_PATH, @mutool_args );
+	my @args = ( $Renard::API::MuPDF::mutool::MUTOOL_PATH, @mutool_args );
 	my ($stdout, $exit);
 
 	# Note: The code below is marked as uncoverable because it only applies
@@ -56,6 +56,12 @@ fun _call_mutool( @mutool_args ) {
 		$stdout = path( $temp_fh->filename )->slurp_raw;     # uncoverable statement
 		$exit = $?;                                          # uncoverable statement
 	} else {
+		# Make sure STDOUT is :raw
+		open my $dup, ">&=", *STDOUT or die $!;
+		local *STDOUT;
+		open(STDOUT, ">&=", $dup);
+		binmode *STDOUT, ':raw';
+
 		($stdout, undef, $exit) = capture {
 			$log->infof("running mutool: %s", \@args);
 			system( @args );
@@ -125,6 +131,27 @@ fun get_mutool_page_info_xml($pdf_filename) {
 		KeyAttr => [],
 		ForceArray => [ qw(page) ] );
 
+	my $root_media_box_p = Renard::API::MuPDF::mutool::ObjectParser->new(
+		filename => $pdf_filename,
+		string => Renard::API::MuPDF::mutool::get_mutool_get_object_raw($pdf_filename, 'Root/Pages/MediaBox'),
+		is_toplevel => 0,
+	);
+	my $root_media_box;
+	if( $root_media_box_p->data ) {
+		$root_media_box->{l} = $root_media_box_p->data->[0];
+		$root_media_box->{b} = $root_media_box_p->data->[1];
+
+		$root_media_box->{r} = $root_media_box_p->data->[2];
+		$root_media_box->{t} = $root_media_box_p->data->[3];
+	}
+
+	for my $page_hash (@{ $page_info->{page} }) {
+		unless( exists $page_hash->{CropBox} ) {
+			my $media_box = exists $page_hash->{MediaBox} ? $page_hash->{MediaBox} : $root_media_box;
+			$page_hash->{CropBox} = { %$media_box };
+		}
+	}
+
 	return $page_info;
 }
 
@@ -136,12 +163,28 @@ fun get_mutool_outline_simple($pdf_filename) {
 	);
 
 	my @outline_items = ();
-	open my $outline_fh, '<:encoding(UTF-8):crlf', \$outline_text;
+	utf8::upgrade($outline_text);
+	open my $outline_fh, '<:crlf', \$outline_text;
 	while( defined( my $line = <$outline_fh> ) ) {
-		$line =~ /^(?<indent>\t*)(?<text>.*)\t#(?<page>\d+)(,(?<dx>\d+),(?<dy>\d+))?$/;
+		$line =~ /^
+			(?<prefix>[+|-])
+			(?<indent>\t*)
+			"(?<text>.*)"
+			\t
+			(?<reference>
+				( \# (?<page>\d+)(,(?<dx>-?\d+),(?<dy>-?\d+))? )
+				|
+				\Q(null)\E
+			)
+			$
+		/x;
 		my %copy = %+;
-		$copy{level} = length $copy{indent};
+		$copy{level} = length($copy{indent}) - 1;
+		$copy{text} =~ s/\\x([0-9A-F]{2})/chr(hex($1))/ge;
+		$copy{open} = $copy{prefix} eq '-';
+		delete $copy{prefix};
 		delete $copy{indent};
+		delete $copy{reference};
 		# not storing the offsets yet and not every line has offsets
 		delete @copy{qw(dx dy)};
 		push @outline_items, \%copy;
@@ -157,7 +200,8 @@ fun get_mutool_get_trailer_raw($pdf_filename) {
 		qw(trailer)
 	);
 
-	open my $trailer_fh, '<:encoding(UTF-8):crlf', \$trailer_text;
+	utf8::upgrade($trailer_text);
+	open my $trailer_fh, '<:crlf', \$trailer_text;
 	do { local $/ = ''; <$trailer_fh> };
 }
 
@@ -168,14 +212,15 @@ fun get_mutool_get_object_raw($pdf_filename, $object_id) {
 		$object_id,
 	);
 
-	open my $object_fh, '<:encoding(UTF-8):crlf', \$object_text;
+	utf8::upgrade($object_text);
+	open my $object_fh, '<:crlf', \$object_text;
 	do { local $/ = ''; <$object_fh> };
 }
 
 fun get_mutool_get_info_object_parsed( $pdf_filename ) {
-	my $trailer = Renard::Incunabula::MuPDF::mutool::ObjectParser->new(
+	my $trailer = Renard::API::MuPDF::mutool::ObjectParser->new(
 		filename => $pdf_filename,
-		string => Renard::Incunabula::MuPDF::mutool::get_mutool_get_trailer_raw($pdf_filename),
+		string => Renard::API::MuPDF::mutool::get_mutool_get_trailer_raw($pdf_filename),
 	);
 
 	my $info = $trailer->resolve_key('Info');
@@ -192,11 +237,11 @@ __END__
 
 =head1 NAME
 
-Renard::Incunabula::MuPDF::mutool - Retrieve PDF image and text data via MuPDF's mutool
+Renard::API::MuPDF::mutool - Retrieve PDF image and text data via MuPDF's mutool
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 FUNCTIONS
 
@@ -328,14 +373,14 @@ as a string.
   fun get_mutool_get_info_object_parsed( $pdf_filename )
 
 Returns the document information dictionary as a
-L<Renard::Incunabula::MuPDF::mutool::ObjectParser> object.
+L<Renard::API::MuPDF::mutool::ObjectParser> object.
 
 See Table 10.2 on pg. 844 of the I<PDF Reference, version 1.7> to see the
 entries that usually used (e.g., Title, Author).
 
 =head1 SEE ALSO
 
-L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-Incunabula-MuPDF-mutool/>
+L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Renard-API-MuPDF-mutool/>
 
 =head1 AUTHOR
 
