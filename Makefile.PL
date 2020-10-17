@@ -37,7 +37,7 @@ my %WriteMakefileArgs = (
     "Test::Most" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.005",
+  "VERSION" => "0.005_01",
   "test" => {
     "TESTS" => "t/Renard/API/MuPDF/*.t t/Renard/API/MuPDF/mutool/*.t"
   }

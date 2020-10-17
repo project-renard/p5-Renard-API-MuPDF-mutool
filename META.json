@@ -63,7 +63,7 @@
          }
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "homepage" : "https://github.com/project-renard/p5-Renard-API-MuPDF-mutool",
       "repository" : {
@@ -72,7 +72,7 @@
          "web" : "https://github.com/project-renard/p5-Renard-API-MuPDF-mutool"
       }
    },
-   "version" : "0.005",
+   "version" : "0.005_01",
    "x_generated_by_perl" : "v5.26.1",
    "x_serialization_backend" : "Cpanel::JSON::XS version 4.24",
    "x_spdx_expression" : "Artistic-1.0-Perl OR GPL-1.0-or-later"
