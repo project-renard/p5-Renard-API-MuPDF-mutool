@@ -289,7 +289,12 @@ fun get_mutool_outline_simple($pdf_filename) {
 			"(?<text>.*)"
 			\t
 			(?<reference>
+				# #123,20,40
 				( \# (?<page>\d+)(,(?<dx>-?\d+),(?<dy>-?\d+))? )
+				|
+				# #page=123&zoom=nan,20,40
+				# #page=123&view=Fit
+				( \# page=(?<page>\d+)(&(view|zoom)=[^&,]+?)*(,(?<dx>-?\d+),(?<dy>-?\d+))? )
 				|
 				\Q(null)\E
 			)
