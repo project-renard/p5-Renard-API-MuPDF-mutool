@@ -1,9 +1,7 @@
 use Renard::Incunabula::Common::Setup;
 package Renard::API::MuPDF::mutool;
 # ABSTRACT: Retrieve PDF image and text data via MuPDF's mutool
-$Renard::API::MuPDF::mutool::VERSION = '0.005_01'; # TRIAL
-
-$Renard::API::MuPDF::mutool::VERSION = '0.00501';
+$Renard::API::MuPDF::mutool::VERSION = '0.006';
 use Capture::Tiny qw(capture);
 use XML::Simple;
 use Alien::MuPDF 0.007;
@@ -174,7 +172,12 @@ fun get_mutool_outline_simple($pdf_filename) {
 			"(?<text>.*)"
 			\t
 			(?<reference>
+				# #123,20,40
 				( \# (?<page>\d+)(,(?<dx>-?\d+),(?<dy>-?\d+))? )
+				|
+				# #page=123&zoom=nan,20,40
+				# #page=123&view=Fit
+				( \# page=(?<page>\d+)(&(view|zoom)=[^&,]+?)*(,(?<dx>-?\d+),(?<dy>-?\d+))? )
 				|
 				\Q(null)\E
 			)
@@ -243,7 +246,7 @@ Renard::API::MuPDF::mutool - Retrieve PDF image and text data via MuPDF's mutool
 
 =head1 VERSION
 
-version 0.005_01
+version 0.006
 
 =head1 FUNCTIONS
 
